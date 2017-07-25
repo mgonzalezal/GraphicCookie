@@ -21,12 +21,13 @@ solution "GraphicCookie"
 		language "C++"
 		kind "WindowedApp"
 		files{
-			"./src/*.cpp",
-			"./include/*.hpp"
+			"./src/**.cpp",
+			"./include/**.hpp"
 		}
 		
 		includedirs{
-			"$(DXSDK_DIR)Include"
+			"$(DXSDK_DIR)Include",
+			"./include"
 		}
 
 		libdirs{

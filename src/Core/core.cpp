@@ -48,6 +48,8 @@ void GraphicCookie::Core::InitEngine()
 	back_buffer->Release();
 	device_context->OMSetRenderTargets(1, &main_back_buffer, NULL);
 
+
+	//Create the viewport and set it.
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 

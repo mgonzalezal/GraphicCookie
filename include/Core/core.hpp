@@ -38,9 +38,5 @@ namespace GraphicCookie {
 		ID3D11Device *device;
 		ID3D11DeviceContext *device_context;
 		ID3D11RenderTargetView *main_back_buffer;
-		ID3D11PixelShader *pixel_shader;
-		ID3D11VertexShader *vertex_shader;
-		ID3D11Buffer *vertex_buffer;
-		ID3D11InputLayout *input_layout;
 	};
 }

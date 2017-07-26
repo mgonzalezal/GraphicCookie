@@ -1,25 +1,6 @@
 #include "./Core/core.hpp"
 #include "./Core/window.hpp"
 
-
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
-
-//Definition of the core data needed for the engine to work
-struct GraphicCookie::Core::CoreData {
-	IDXGISwapChain *swap_chain;
-	ID3D11Device *device;
-	ID3D11DeviceContext *device_context;
-	ID3D11RenderTargetView *main_back_buffer;
-	ID3D11PixelShader *pixel_shader;
-	ID3D11VertexShader *vertex_shader;
-	ID3D11Buffer *vertex_buffer;
-	ID3D11InputLayout *input_layout;
-};
-
-
-
 GraphicCookie::Core* GraphicCookie::Core::instance_ = nullptr;
 
 GraphicCookie::Core* GraphicCookie::Core::getInstance()
@@ -55,17 +36,17 @@ void GraphicCookie::Core::InitEngine()
 		NULL, // Number of features listed before.
 		D3D11_SDK_VERSION, // Version of the directx sdk used in our game.
 		&swap_chain_desc, // Pointer to the swap chain defined before.
-		&core_data_->swap_chain, // Swap chain pointer to a pointer, meaning that is going to create the object for us.
-		&core_data_->device, // Same as above but for the device
+		&swap_chain, // Swap chain pointer to a pointer, meaning that is going to create the object for us.
+		&device, // Same as above but for the device
 		NULL, // Feature levels if we put a variable here, we could be able to know what features we have available.
-		&core_data_->device_context // Same as the swap chain and device.
+		&device_context // Same as the swap chain and device.
 	);
 
 	ID3D11Texture2D* back_buffer; // Declare a 2D texture where we are going to render.
-	core_data_->swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&back_buffer));
-	core_data_->device->CreateRenderTargetView(back_buffer, NULL, &core_data_->main_back_buffer);
+	swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&back_buffer));
+	device->CreateRenderTargetView(back_buffer, NULL, &main_back_buffer);
 	back_buffer->Release();
-	core_data_->device_context->OMSetRenderTargets(1, &core_data_->main_back_buffer, NULL);
+	device_context->OMSetRenderTargets(1, &main_back_buffer, NULL);
 
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
@@ -75,7 +56,7 @@ void GraphicCookie::Core::InitEngine()
 	viewport.Width = width;
 	viewport.Height = height;
 
-	core_data_->device_context->RSSetViewports(1, &viewport);
+	device_context->RSSetViewports(1, &viewport);
 }
 
 GraphicCookie::Window* GraphicCookie::Core::getWindow()
@@ -90,23 +71,36 @@ void GraphicCookie::Core::ShutdownEngine()
 
 GraphicCookie::Core::Core()
 {
-	core_data_ = std::unique_ptr<CoreData>(new CoreData());
 	window_ = std::unique_ptr<GraphicCookie::Window>(new GraphicCookie::Window());
 }
 
 GraphicCookie::Core::~Core()
 {
-	core_data_->swap_chain->SetFullscreenState(false, NULL); // Go to windowed mode when closing.
-	core_data_->swap_chain->Release();
-	core_data_->main_back_buffer->Release();
-	core_data_->device->Release();
-	core_data_->device_context->Release();
+	swap_chain->SetFullscreenState(false, NULL); // Go to windowed mode when closing.
+	swap_chain->Release();
+	main_back_buffer->Release();
+	device->Release();
+	device_context->Release();
 }
 
-int WINAPI WinMain(HINSTANCE app_instance, HINSTANCE previous_instance, LPSTR cmd_data, int number_parameters) {
-	GraphicCookie::Core::getInstance()->Init();
-	
+void GraphicCookie::Core::RenderCore() {
+	float clearColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	device_context->ClearRenderTargetView(main_back_buffer, clearColor);
+	RenderUser();
+	swap_chain->Present(0, 0);
+}
+
+ID3D11DeviceContext& GraphicCookie::Core::getDeviceContext() {
+	return *device_context;
+}
+
+int WINAPI WinMain(HINSTANCE app_instance, HINSTANCE previous_instance, LPSTR cmd_data, int number_parameters) {	
+	GraphicCookie::Core *instance = GraphicCookie::Core::getInstance();
+
+
 	GraphicCookie::Window::CreateWindowGC(800, 600, app_instance, number_parameters);
+
+	instance->InitUser();
 
 	MSG message;
 
@@ -117,8 +111,8 @@ int WINAPI WinMain(HINSTANCE app_instance, HINSTANCE previous_instance, LPSTR cm
 			DispatchMessage(&message); // Dispatch the message to the WinProc function.
 			if (message.message == WM_QUIT) break; // If the message is WM_QUIT we break the main loop.
 		}
-		GraphicCookie::Core::getInstance()->Update();
-		GraphicCookie::Core::getInstance()->Render();
+		instance->UpdateUser();		
+		instance->RenderCore();
 		//Render();
 	}
 

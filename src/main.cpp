@@ -2,6 +2,7 @@
 
 #include "Core\core.hpp"
 #include "Core\window.hpp"
+#include "Core\object.hpp"
 
 
 /*
@@ -77,15 +78,18 @@ void Render() {
 	g_swap_chain->Present(0, 0);
 }*/
 
+std::unique_ptr<GraphicCookie::Object> triangle;
 
-void GraphicCookie::Core::Init() {
+void GraphicCookie::Core::InitUser() {
+	triangle = std::unique_ptr<GraphicCookie::Object>(new GraphicCookie::Object());
+	triangle->Load();
+	triangle->Init();
+}
+
+void GraphicCookie::Core::UpdateUser() {
 
 }
 
-void GraphicCookie::Core::Update() {
-
-}
-
-void GraphicCookie::Core::Render() {
-
+void GraphicCookie::Core::RenderUser() {
+	triangle->Render();
 }

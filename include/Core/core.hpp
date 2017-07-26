@@ -3,19 +3,27 @@
 #include <memory>
 #include <Windows.h>
 
+#include <d3d11.h>
+#include <d3dx11.h>
+#include <d3dx10.h>
 
 namespace GraphicCookie {
 	class Window;
 
 	class Core {
 		friend class Window;
+		friend class Object;
 	 public:
 		static Core* getInstance();
 		Window* getWindow();
 		void ShutdownEngine();
-		void Init();
-		void Update();
-		void Render();
+		void InitUser();
+		void UpdateUser();
+		void RenderUser();
+
+		void RenderCore();
+
+		ID3D11DeviceContext& getDeviceContext();
 
 	 private:
 		Core();
@@ -24,9 +32,15 @@ namespace GraphicCookie {
 
 		std::unique_ptr<Window> window_;
 
-		struct CoreData;
-		std::unique_ptr<CoreData> core_data_;
-
 		void InitEngine();
+
+		IDXGISwapChain *swap_chain;
+		ID3D11Device *device;
+		ID3D11DeviceContext *device_context;
+		ID3D11RenderTargetView *main_back_buffer;
+		ID3D11PixelShader *pixel_shader;
+		ID3D11VertexShader *vertex_shader;
+		ID3D11Buffer *vertex_buffer;
+		ID3D11InputLayout *input_layout;
 	};
 }

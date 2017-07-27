@@ -12,7 +12,6 @@ namespace GraphicCookie {
 
 	class Core {
 		friend class Window;
-		friend class Object;
 	 public:
 		static Core* getInstance();
 		Window* getWindow();
@@ -20,9 +19,11 @@ namespace GraphicCookie {
 		void InitUser();
 		void UpdateUser();
 		void RenderUser();
-
 		void RenderCore();
 
+		bool IsRunning();
+
+		ID3D11Device& getDevice();
 		ID3D11DeviceContext& getDeviceContext();
 
 	 private:
@@ -38,5 +39,6 @@ namespace GraphicCookie {
 		ID3D11Device *device;
 		ID3D11DeviceContext *device_context;
 		ID3D11RenderTargetView *main_back_buffer;
+		bool is_running_;
 	};
 }

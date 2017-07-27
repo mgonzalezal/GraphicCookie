@@ -18,16 +18,16 @@ void GraphicCookie::Object::Update() {
 }
 
 void GraphicCookie::Object::Render() {
-	Core::getInstance()->device_context->IASetInputLayout(input_layout_);
+	Core::getInstance()->getDeviceContext().IASetInputLayout(input_layout_);
 
 	unsigned int stride = sizeof(VertexInfo);
 	unsigned int offset = 0;
 
-	Core::getInstance()->device_context->IASetVertexBuffers(0, 1, &vertex_buffer_, &stride, &offset);
-	Core::getInstance()->device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	Core::getInstance()->device_context->VSSetShader(vertex_shader_, 0, 0);
-	Core::getInstance()->device_context->PSSetShader(pixel_shader_, 0, 0);
-	Core::getInstance()->device_context->Draw(3, 0);
+	Core::getInstance()->getDeviceContext().IASetVertexBuffers(0, 1, &vertex_buffer_, &stride, &offset);
+	Core::getInstance()->getDeviceContext().IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	Core::getInstance()->getDeviceContext().VSSetShader(vertex_shader_, 0, 0);
+	Core::getInstance()->getDeviceContext().PSSetShader(pixel_shader_, 0, 0);
+	Core::getInstance()->getDeviceContext().Draw(3, 0);
 }
 
 void GraphicCookie::Object::Load() {
@@ -46,7 +46,7 @@ void GraphicCookie::Object::Load() {
 	ZeroMemory(&vertex_data, sizeof(D3D11_SUBRESOURCE_DATA));
 	vertex_data.pSysMem = &vertex_info_[0];
 
-	HRESULT vertex_buffer_result = GraphicCookie::Core::getInstance()->device->CreateBuffer(&vertex_description,&vertex_data,&vertex_buffer_);
+	HRESULT vertex_buffer_result = GraphicCookie::Core::getInstance()->getDevice().CreateBuffer(&vertex_description,&vertex_data,&vertex_buffer_);
 }
 
 void GraphicCookie::Object::Compile() {
@@ -68,15 +68,15 @@ void GraphicCookie::Object::Compile() {
 		MessageBox(NULL, error_message, "Error compiling pixel shader", MB_OK);
 	}
 
-	Core::getInstance()->device->CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), 0, &vertex_shader_);
-	Core::getInstance()->device->CreatePixelShader(pixel->GetBufferPointer(), pixel->GetBufferSize(),0, &pixel_shader_);
+	Core::getInstance()->getDevice().CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), 0, &vertex_shader_);
+	Core::getInstance()->getDevice().CreatePixelShader(pixel->GetBufferPointer(), pixel->GetBufferSize(),0, &pixel_shader_);
 
 	D3D11_INPUT_ELEMENT_DESC layout_information[] {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
-	Core::getInstance()->device->CreateInputLayout(layout_information, 2, vertex->GetBufferPointer(), vertex->GetBufferSize(), &input_layout_);
+	Core::getInstance()->getDevice().CreateInputLayout(layout_information, 2, vertex->GetBufferPointer(), vertex->GetBufferSize(), &input_layout_);
 
 	vertex->Release();
 	pixel->Release();

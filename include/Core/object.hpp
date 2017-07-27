@@ -4,6 +4,11 @@
 #include "D3DX11.h"
 #include <vector>
 
+enum ObjectType {
+	ObjectType_Triangle,
+	ObjectType_Quad
+};
+
 struct VertexInfo {
 	float x, y, z;
 	float r, g, b, a;

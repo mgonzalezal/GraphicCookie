@@ -59,6 +59,8 @@ void GraphicCookie::Core::InitEngine()
 	viewport.Height = height;
 
 	device_context->RSSetViewports(1, &viewport);
+
+	is_running_ = true;
 }
 
 GraphicCookie::Window* GraphicCookie::Core::getWindow()
@@ -68,7 +70,21 @@ GraphicCookie::Window* GraphicCookie::Core::getWindow()
 
 void GraphicCookie::Core::ShutdownEngine()
 {
-	delete instance_;
+	if (swap_chain) {
+		swap_chain->SetFullscreenState(false, NULL); // Go to windowed mode when closing.
+		swap_chain->Release();
+	}
+	if (main_back_buffer) {
+		main_back_buffer->Release();
+	}
+	if (device) {
+		device->Release();
+	}
+	if (device_context) {
+		device_context->Release();
+	}
+
+	is_running_ = false;
 }
 
 GraphicCookie::Core::Core()
@@ -78,11 +94,7 @@ GraphicCookie::Core::Core()
 
 GraphicCookie::Core::~Core()
 {
-	swap_chain->SetFullscreenState(false, NULL); // Go to windowed mode when closing.
-	swap_chain->Release();
-	main_back_buffer->Release();
-	device->Release();
-	device_context->Release();
+
 }
 
 void GraphicCookie::Core::RenderCore() {
@@ -90,6 +102,16 @@ void GraphicCookie::Core::RenderCore() {
 	device_context->ClearRenderTargetView(main_back_buffer, clearColor);
 	RenderUser();
 	swap_chain->Present(0, 0);
+}
+
+bool GraphicCookie::Core::IsRunning()
+{
+	return is_running_;
+}
+
+ID3D11Device& GraphicCookie::Core::getDevice()
+{
+	return *device;
 }
 
 ID3D11DeviceContext& GraphicCookie::Core::getDeviceContext() {
@@ -106,21 +128,20 @@ int WINAPI WinMain(HINSTANCE app_instance, HINSTANCE previous_instance, LPSTR cm
 
 	MSG message;
 
-	while (true) {
+	while (instance->IsRunning()) {
 		// We use PeekMessage because getmessage is blocking until receives a message, and PeekMessage is not blocking.
 		if (PeekMessage(&message, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&message); //In case we got a keyboard message, translate it in a right way.
 			DispatchMessage(&message); // Dispatch the message to the WinProc function.
-			if (message.message == WM_QUIT) break; // If the message is WM_QUIT we break the main loop.
 		}
-		instance->UpdateUser();		
-		instance->RenderCore();
-		//Render();
+
+		if (message.message == WM_QUIT) {
+			GraphicCookie::Core::getInstance()->ShutdownEngine();
+		}else{
+			instance->UpdateUser();		
+			instance->RenderCore();		
+		}
 	}
-
-	//CleanDirectx();
-
-	GraphicCookie::Core::getInstance()->ShutdownEngine();
 
 	return 0;
 }

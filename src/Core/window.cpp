@@ -7,36 +7,45 @@ GraphicCookie::Window::Window()
 
 GraphicCookie::Window::~Window()
 {
+	ChangeDisplaySettings(NULL, 0);
+	DestroyWindow(window_instance_);
+	window_instance_ = NULL;
+	UnregisterClass(window_name_.c_str(), app_instance_);
+	app_instance_ = NULL;
 }
 
-void GraphicCookie::Window::CreateWindowGC(float width, float height, HINSTANCE app_instance, int number_parameters)
+void GraphicCookie::Window::CreateWindowGC(float width, float height, int number_parameters)
 {
+	HINSTANCE app_instance_ = GetModuleHandle(NULL);
+
 	Window* window = Core::getInstance()->getWindow();
 
 	window->width_ = width;
 	window->height_ = height;
 
+	window->window_name_ = "Engine";
+
 	//Windows class struct to fill (necessary to create the window) and clear the memory
-	WNDCLASSEX window_class;
-	ZeroMemory(&window_class, sizeof(WNDCLASSEX));
+	ZeroMemory(&window->window_class_, sizeof(WNDCLASSEX));
 
-	window_class.cbSize = sizeof(WNDCLASSEX); //Tell the size of the struct WNDCLASSEX | WNDCLASS ETC...
-	window_class.style = CS_HREDRAW | CS_VREDRAW; // Redraws the window if we move it horizontally or vertically.
-	window_class.lpfnWndProc = WindowProc; // Function to handle the events
-	window_class.hInstance = app_instance; // App instance given in WinMain
-	window_class.hCursor = LoadCursor(app_instance, IDC_ARROW); // Load a cursor in this case the hand one
-																//window_class.hbrBackground = (HBRUSH)COLOR_WINDOW; // Specify the window background color.
-	window_class.lpszClassName = "WindowClass"; // Name the window class
+	window->window_class_.cbSize = sizeof(WNDCLASSEX); //Tell the size of the struct WNDCLASSEX | WNDCLASS ETC...
+	window->window_class_.style = CS_HREDRAW | CS_VREDRAW; // Redraws the window if we move it horizontally or vertically.
+	window->window_class_.lpfnWndProc = WindowProc; // Function to handle the events
+	window->window_class_.hInstance = app_instance_; // App instance given in WinMain
+	window->window_class_.hCursor = LoadCursor(NULL, IDC_HAND); // Load a cursor in this case the hand one
+	window->window_class_.hIcon = LoadIcon(NULL, IDI_WINLOGO);
+	window->window_class_.hIconSm = window->window_class_.hIcon;
+	window->window_class_.lpszMenuName = NULL;
+	window->window_class_.lpszClassName = window->window_name_.c_str(); // Name the window class
 
-												//Register the window class.
-	RegisterClassEx(&window_class);
+	RegisterClassEx(&window->window_class_);//Register the window class.
 
 	RECT window_rect = { 0, 0, width, height };
 	AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW, false);
 	
 
 	window->window_instance_ = CreateWindowEx(NULL,
-		"WindowClass", //Name of the windows class
+		window->window_name_.c_str(), //Name of the windows class
 		"Directx11 Test", //Title show in the window's bar
 		WS_OVERLAPPEDWINDOW, // Style of the window
 		300, // x position
@@ -45,7 +54,7 @@ void GraphicCookie::Window::CreateWindowGC(float width, float height, HINSTANCE 
 		window_rect.bottom - window_rect.top, // window height
 		NULL, // Parent window
 		NULL, // Menu bar handler
-		app_instance, // program handler passed in WinMain
+		app_instance_, // program handler passed in WinMain
 		NULL // Use in case of multiple windows
 	);
 
@@ -56,6 +65,8 @@ void GraphicCookie::Window::CreateWindowGC(float width, float height, HINSTANCE 
 	}
 
 	ShowWindow(window->window_instance_, number_parameters);
+	SetForegroundWindow(window->window_instance_);
+	SetFocus(window->window_instance_);
 
 	Core::getInstance()->InitEngine();
 }

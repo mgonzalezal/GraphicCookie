@@ -41,14 +41,14 @@ solution "GraphicCookie"
 			defines     { "DEBUG_CONFIG" }
 			flags       { "Symbols" }
 			targetdir  "bin/debug" 
-			postbuildcommands { "xcopy /c /s /i /y ..\\data .\\bin\\debug\\data",
+			postbuildcommands { "xcopy /c /s /i /y ..\\data ..\\bin\\debug\\data",
 			"xcopy /c /s /i /y ..\\data ..\\build\\data" }
 
 		configuration "Release"
 			defines     { "RELEASE_CONFIG" }
 			flags       { "OptimizeSize" }
 			targetdir   "bin/release" 
-			postbuildcommands { "xcopy /c /s /i /y ..\\data .\\bin\\release\\data",
+			postbuildcommands { "xcopy /c /s /i /y ..\\data ..\\bin\\release\\data",
 			"xcopy /c /s /i /y ..\\data ..\\build\\data" }
 
 		configuration "x32"

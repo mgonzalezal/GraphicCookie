@@ -8,7 +8,7 @@ std::unique_ptr<GraphicCookie::Object> triangle;
 
 void GraphicCookie::Core::InitUser() {
 	triangle = std::unique_ptr<GraphicCookie::Object>(new GraphicCookie::Object());
-	triangle->Load();
+	triangle->Load(ObjectType::ObjectType_Quad);
 	triangle->Init();
 }
 

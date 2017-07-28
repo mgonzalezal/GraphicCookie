@@ -24,22 +24,50 @@ void GraphicCookie::Object::Render() {
 	unsigned int offset = 0;
 
 	Core::getInstance()->getDeviceContext().IASetVertexBuffers(0, 1, &vertex_buffer_, &stride, &offset);
-	Core::getInstance()->getDeviceContext().IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	Core::getInstance()->getDeviceContext().IASetIndexBuffer(index_buffer_, DXGI_FORMAT_R32_UINT, 0);
+	Core::getInstance()->getDeviceContext().IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	Core::getInstance()->getDeviceContext().VSSetShader(vertex_shader_, 0, 0);
 	Core::getInstance()->getDeviceContext().PSSetShader(pixel_shader_, 0, 0);
-	Core::getInstance()->getDeviceContext().Draw(3, 0);
+	Core::getInstance()->getDeviceContext().DrawIndexed(index_info_.size(), 0, 0);
 }
 
-void GraphicCookie::Object::Load() {
-	vertex_info_.push_back({ 0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
-	vertex_info_.push_back({ 0.45f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
-	vertex_info_.push_back({ -0.45f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
+void GraphicCookie::Object::Load(ObjectType object_type) {
+	switch (object_type)
+	{
+		case ObjectType_Triangle: {
+			vertex_info_.push_back({ -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
+			vertex_info_.push_back({ 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
+			vertex_info_.push_back({ 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
 
+			index_info_.push_back(0);
+			index_info_.push_back(1);
+			index_info_.push_back(2);
+			break;
+		}
+		case ObjectType_Quad: {
+			vertex_info_.push_back({ -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
+			vertex_info_.push_back({ 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
+			vertex_info_.push_back({ -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
+			vertex_info_.push_back({ 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
+
+			index_info_.push_back(0);
+			index_info_.push_back(1);
+			index_info_.push_back(2);
+			index_info_.push_back(3);
+			break;
+		}
+		
+		default: {
+			break;
+		}
+	}
+
+	// Create the vertex buffer and upload the data.
 	D3D11_BUFFER_DESC vertex_description;
 	ZeroMemory(&vertex_description,sizeof(D3D11_BUFFER_DESC));
 
 	vertex_description.Usage = D3D11_USAGE_DEFAULT;
-	vertex_description.BindFlags = D3D10_BIND_VERTEX_BUFFER;
+	vertex_description.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertex_description.ByteWidth = sizeof(VertexInfo) * vertex_info_.size();
 
 	D3D11_SUBRESOURCE_DATA vertex_data;
@@ -47,6 +75,21 @@ void GraphicCookie::Object::Load() {
 	vertex_data.pSysMem = &vertex_info_[0];
 
 	HRESULT vertex_buffer_result = GraphicCookie::Core::getInstance()->getDevice().CreateBuffer(&vertex_description,&vertex_data,&vertex_buffer_);
+
+
+	// Create the index buffer and upload the data.
+	D3D11_BUFFER_DESC index_description;
+	ZeroMemory(&index_description, sizeof(D3D11_BUFFER_DESC));
+
+	index_description.Usage = D3D11_USAGE_DEFAULT;
+	index_description.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	index_description.ByteWidth = sizeof(unsigned int) * index_info_.size();
+
+	D3D11_SUBRESOURCE_DATA index_data;
+	ZeroMemory(&index_data, sizeof(D3D11_SUBRESOURCE_DATA));
+	index_data.pSysMem = &index_info_[0];
+
+	HRESULT index_buffer_result = GraphicCookie::Core::getInstance()->getDevice().CreateBuffer(&index_description, &index_data, &index_buffer_);
 }
 
 void GraphicCookie::Object::Compile() {

@@ -14,6 +14,7 @@ void GraphicCookie::Core::InitEngine()
 {
 	float width, height;
 	window_->getWindowSize(&width, &height);
+
 	//Create a struct with the definition of our swap chain (back buffers and stuff).
 	DXGI_SWAP_CHAIN_DESC swap_chain_desc;
 	ZeroMemory(&swap_chain_desc, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -47,7 +48,32 @@ void GraphicCookie::Core::InitEngine()
 	device->CreateRenderTargetView(back_buffer, NULL, &main_back_buffer);
 	back_buffer->Release();
 	device_context->OMSetRenderTargets(1, &main_back_buffer, NULL);
+	
+	ID3D11RasterizerState* rasterizer;
+	D3D11_RASTERIZER_DESC rasterizer_desc;
+	ZeroMemory(&rasterizer_desc, sizeof(D3D11_RASTERIZER_DESC));
 
+	rasterizer_desc.FillMode = D3D11_FILL_SOLID; // Determines how we want to render a primitive, for example solid or wireframe.
+	rasterizer_desc.CullMode = D3D11_CULL_BACK; // The faces that we want to cull or not.
+	rasterizer_desc.FrontCounterClockwise = true; // If we want to render the triangles counter clock wise or not
+	
+	// TODO: Calculate this value when depth buffer created.
+	rasterizer_desc.DepthBias = 0; 
+	rasterizer_desc.DepthBiasClamp = 0.0f;
+	rasterizer_desc.SlopeScaledDepthBias = 0.0f;
+	rasterizer_desc.DepthClipEnable = true;
+	//TODOEND
+
+	rasterizer_desc.ScissorEnable = false; // If we have pixels outside a rectagle we will cull them (false until scissor activated)
+	rasterizer_desc.MultisampleEnable = false;
+	rasterizer_desc.AntialiasedLineEnable = false;
+
+	result = device->CreateRasterizerState(&rasterizer_desc,&rasterizer);
+	if (FAILED(result)) {
+		MessageBox(NULL, "Rasterizer not created", "Warning", MB_OK);
+	}
+
+	device_context->RSSetState(rasterizer);
 
 	//Create the viewport and set it.
 	D3D11_VIEWPORT viewport;
@@ -122,7 +148,7 @@ int WINAPI WinMain(HINSTANCE app_instance, HINSTANCE previous_instance, LPSTR cm
 	GraphicCookie::Core *instance = GraphicCookie::Core::getInstance();
 
 
-	GraphicCookie::Window::CreateWindowGC(800, 600, app_instance, number_parameters);
+	GraphicCookie::Window::CreateWindowGC(800, 600, number_parameters);
 
 	instance->InitUser();
 

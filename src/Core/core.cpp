@@ -56,7 +56,7 @@ void GraphicCookie::Core::InitEngine()
 	texture_stencil_depth_description.Height = height;
 	texture_stencil_depth_description.MipLevels = 1;
 	texture_stencil_depth_description.ArraySize = 1;
-	texture_stencil_depth_description.Format = DXGI_FORMAT_D32_FLOAT;
+	texture_stencil_depth_description.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 	texture_stencil_depth_description.SampleDesc.Count = 1;
 	texture_stencil_depth_description.SampleDesc.Quality = 0;
 	texture_stencil_depth_description.Usage = D3D11_USAGE_DEFAULT;
@@ -101,7 +101,7 @@ void GraphicCookie::Core::InitEngine()
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc;
 	ZeroMemory(&depth_stencil_view_desc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-	depth_stencil_view_desc.Format = DXGI_FORMAT_D32_FLOAT;
+	depth_stencil_view_desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 	depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
@@ -142,6 +142,8 @@ void GraphicCookie::Core::InitEngine()
 	viewport.TopLeftY = 0;
 	viewport.Width = width;
 	viewport.Height = height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 
 	device_context->RSSetViewports(1, &viewport);
 
@@ -191,7 +193,7 @@ GraphicCookie::Core::~Core()
 void GraphicCookie::Core::RenderCore() {
 	float clearColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	device_context->ClearRenderTargetView(main_back_buffer, clearColor);
-	device_context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	device_context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	RenderUser();
 	swap_chain->Present(0, 0);
 }

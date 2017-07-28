@@ -72,9 +72,9 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 	switch (object_type)
 	{
 		case ObjectType_Triangle: {
-			vertex_info_.push_back({ -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
-			vertex_info_.push_back({ 0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
+			vertex_info_.push_back({ -2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
+			vertex_info_.push_back({ 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
+			vertex_info_.push_back({ 2.0f, 2.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
 
 			index_info_.push_back(0);
 			index_info_.push_back(1);

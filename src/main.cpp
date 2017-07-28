@@ -4,12 +4,12 @@
 #include "Core\window.hpp"
 #include "Core\object.hpp"
 
-std::unique_ptr<GraphicCookie::Object> triangle;
+std::unique_ptr<GraphicCookie::Object> cube;
 
 void GraphicCookie::Core::InitUser() {
-	triangle = std::unique_ptr<GraphicCookie::Object>(new GraphicCookie::Object());
-	triangle->Load(ObjectType::ObjectType_Cube);
-	triangle->Init();
+	cube = std::unique_ptr<GraphicCookie::Object>(new GraphicCookie::Object());
+	cube->Load(ObjectType::ObjectType_Cube);
+	cube->Init();
 }
 
 void GraphicCookie::Core::UpdateUser() {
@@ -17,5 +17,5 @@ void GraphicCookie::Core::UpdateUser() {
 }
 
 void GraphicCookie::Core::RenderUser() {
-	triangle->Render();
+	cube->Render();
 }

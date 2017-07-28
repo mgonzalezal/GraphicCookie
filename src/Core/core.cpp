@@ -25,7 +25,7 @@ void GraphicCookie::Core::InitEngine()
 	swap_chain_desc.BufferDesc.Height = height; // back buffer height
 	swap_chain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // Specify the use of the back buffer in this case we want it to draw in the screen.
 	swap_chain_desc.OutputWindow = window_->getHandler(); // Window where we want to draw stuff.
-	swap_chain_desc.SampleDesc.Count = 4; // Number of multisample we want.
+	swap_chain_desc.SampleDesc.Count = 1; // Number of multisample we want.
 	swap_chain_desc.Windowed = true; // Just tell if the window is windowed or not.
 	swap_chain_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // This allows to switch from windowed to fullscreen and viceversa.
 
@@ -47,8 +47,67 @@ void GraphicCookie::Core::InitEngine()
 	swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&back_buffer));
 	device->CreateRenderTargetView(back_buffer, NULL, &main_back_buffer);
 	back_buffer->Release();
-	device_context->OMSetRenderTargets(1, &main_back_buffer, NULL);
-	
+
+	ID3D11Texture2D* stencil_depth_buffer;
+	D3D11_TEXTURE2D_DESC texture_stencil_depth_description;
+	ZeroMemory(&texture_stencil_depth_description,sizeof(D3D11_TEXTURE2D_DESC));
+
+	texture_stencil_depth_description.Width = width;
+	texture_stencil_depth_description.Height = height;
+	texture_stencil_depth_description.MipLevels = 1;
+	texture_stencil_depth_description.ArraySize = 1;
+	texture_stencil_depth_description.Format = DXGI_FORMAT_D32_FLOAT;
+	texture_stencil_depth_description.SampleDesc.Count = 1;
+	texture_stencil_depth_description.SampleDesc.Quality = 0;
+	texture_stencil_depth_description.Usage = D3D11_USAGE_DEFAULT;
+	texture_stencil_depth_description.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	texture_stencil_depth_description.CPUAccessFlags = 0;
+	texture_stencil_depth_description.MiscFlags = 0;
+	result = device->CreateTexture2D(&texture_stencil_depth_description, NULL, &stencil_depth_buffer);
+	if (FAILED(result))
+	{
+		MessageBox(NULL, "Error creating texture", "Error", MB_OK);
+	}
+
+	D3D11_DEPTH_STENCIL_DESC depth_stencil_description;
+	ZeroMemory(&depth_stencil_description, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+
+	//Depth configuration
+	depth_stencil_description.DepthEnable = true;
+	depth_stencil_description.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depth_stencil_description.DepthFunc = D3D11_COMPARISON_LESS;
+
+	// Stencil configuration
+	depth_stencil_description.StencilEnable = true;
+	depth_stencil_description.StencilReadMask = 0xFF;
+	depth_stencil_description.StencilWriteMask = 0xFF;
+
+	// Stencil operations in case pixel is front
+	depth_stencil_description.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_description.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depth_stencil_description.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_description.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations in case pixel is back
+	depth_stencil_description.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_description.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depth_stencil_description.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_description.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	ID3D11DepthStencilState* depth_stencil_state;
+	device->CreateDepthStencilState(&depth_stencil_description, &depth_stencil_state);
+	device_context->OMSetDepthStencilState(depth_stencil_state, 1);
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc;
+	ZeroMemory(&depth_stencil_view_desc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+	depth_stencil_view_desc.Format = DXGI_FORMAT_D32_FLOAT;
+	depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depth_stencil_view_desc.Texture2D.MipSlice = 0;
+
+	device->CreateDepthStencilView(stencil_depth_buffer, &depth_stencil_view_desc, &depth_stencil_view);
+	device_context->OMSetRenderTargets(1, &main_back_buffer, depth_stencil_view);
+		
 	ID3D11RasterizerState* rasterizer;
 	D3D11_RASTERIZER_DESC rasterizer_desc;
 	ZeroMemory(&rasterizer_desc, sizeof(D3D11_RASTERIZER_DESC));
@@ -100,9 +159,15 @@ void GraphicCookie::Core::ShutdownEngine()
 		swap_chain->SetFullscreenState(false, NULL); // Go to windowed mode when closing.
 		swap_chain->Release();
 	}
+	
 	if (main_back_buffer) {
 		main_back_buffer->Release();
 	}
+
+	if (depth_stencil_view) {
+		depth_stencil_view->Release();
+	}
+
 	if (device) {
 		device->Release();
 	}
@@ -126,6 +191,7 @@ GraphicCookie::Core::~Core()
 void GraphicCookie::Core::RenderCore() {
 	float clearColor[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	device_context->ClearRenderTargetView(main_back_buffer, clearColor);
+	device_context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	RenderUser();
 	swap_chain->Present(0, 0);
 }

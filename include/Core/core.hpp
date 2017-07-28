@@ -39,6 +39,7 @@ namespace GraphicCookie {
 		ID3D11Device *device;
 		ID3D11DeviceContext *device_context;
 		ID3D11RenderTargetView *main_back_buffer;
+		ID3D11DepthStencilView *depth_stencil_view;
 		bool is_running_;
 	};
 }

@@ -2,16 +2,24 @@
 
 #include <memory>
 #include "D3DX11.h"
+#include "D3dx9math.h"
 #include <vector>
 
 enum ObjectType {
 	ObjectType_Triangle,
-	ObjectType_Quad
+	ObjectType_Quad,
+	ObjectType_Cube
 };
 
 struct VertexInfo {
 	float x, y, z;
 	float r, g, b, a;
+};
+
+struct MatrixData {
+	D3DXMATRIX model;
+	D3DXMATRIX view;
+	D3DXMATRIX projection;
 };
 
 namespace GraphicCookie {
@@ -31,10 +39,12 @@ namespace GraphicCookie {
 		ID3D11InputLayout* input_layout_;
 		ID3D11Buffer* vertex_buffer_;
 		ID3D11Buffer* index_buffer_;
+		ID3D11Buffer* matrix_buffer_;
 
 		ObjectType object_type_;
 
 		std::vector<VertexInfo> vertex_info_;
 		std::vector<unsigned int> index_info_;
+		MatrixData matrix_data_;
 	};
 }

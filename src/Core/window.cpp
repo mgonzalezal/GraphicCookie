@@ -46,7 +46,7 @@ void GraphicCookie::Window::CreateWindowGC(float width, float height, int number
 
 	window->window_instance_ = CreateWindowEx(NULL,
 		window->window_name_.c_str(), //Name of the windows class
-		"Directx11 Test", //Title show in the window's bar
+		"Graphic Cookie Engine", //Title show in the window's bar
 		WS_OVERLAPPEDWINDOW, // Style of the window
 		300, // x position
 		300, // y position

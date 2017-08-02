@@ -8,13 +8,13 @@ cbuffer MatrixBuffer {
 struct VertexInput
 {
 	float4 position : POSITION;
-	float4 color : COLOR;
+	float2 tex : TEXCOORD0;
 };
 
 struct PixelInput
 {
 	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	float2 tex : TEXCOORD0;
 };
 
 PixelInput VShader(VertexInput input)
@@ -24,14 +24,19 @@ PixelInput VShader(VertexInput input)
 	output.position = mul(input.position, model_matrix);
 	output.position = mul(output.position, view_matrix);
 	output.position = mul(output.position, projection_matrix);
-	//output.position = input.position;
-	output.color = input.color;
+	output.tex = input.tex;
 
 	return output;
 }
 
+Texture2D texture_shader;
+SamplerState sampler_type;
 
 float4 PShader(PixelInput pixel_input) : SV_TARGET
 {
-	return pixel_input.color;
+	float texture_color;
+
+	texture_color = texture_shader.Sample(sampler_type, pixel_input.tex);
+
+	return texture_color;
 }

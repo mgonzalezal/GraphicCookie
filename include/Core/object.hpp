@@ -12,8 +12,8 @@ enum ObjectType {
 };
 
 struct VertexInfo {
-	float x, y, z;
-	float r, g, b, a;
+	D3DXVECTOR3 position;
+	D3DXVECTOR2 uv;
 };
 
 struct MatrixData {
@@ -32,6 +32,8 @@ namespace GraphicCookie {
 		void Update();
 		void Render();
 		void Load(ObjectType object_type);
+
+		void SetPosition(float position[3]);
 	private:
 		void Compile();
 		ID3D11VertexShader* vertex_shader_;
@@ -46,5 +48,7 @@ namespace GraphicCookie {
 		std::vector<VertexInfo> vertex_info_;
 		std::vector<unsigned int> index_info_;
 		MatrixData matrix_data_;
+
+		D3DXVECTOR3 position_;
 	};
 }

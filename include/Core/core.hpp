@@ -14,6 +14,8 @@ namespace GraphicCookie {
 		friend class Window;
 	 public:
 		static Core* getInstance();
+		static void ShutdownEngineStatic();
+
 		Window* getWindow();
 		void ShutdownEngine();
 		void InitUser();

@@ -10,6 +10,11 @@ GraphicCookie::Core* GraphicCookie::Core::getInstance()
 	return instance_ = new Core();
 }
 
+void GraphicCookie::Core::ShutdownEngineStatic()
+{
+	getInstance()->ShutdownEngine();
+}
+
 void GraphicCookie::Core::InitEngine()
 {
 	float width, height;

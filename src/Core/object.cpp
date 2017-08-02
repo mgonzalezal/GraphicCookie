@@ -8,12 +8,12 @@ GraphicCookie::Object::Object(){
 }
 
 GraphicCookie::Object::~Object() {
-	vertex_shader_->Release();
-	pixel_shader_->Release();
-	input_layout_->Release();
-	vertex_buffer_->Release();
-	index_buffer_->Release();
-	matrix_buffer_->Release();
+	if(vertex_shader_) vertex_shader_->Release();
+	if (pixel_shader_) pixel_shader_->Release();
+	if (input_layout_) input_layout_->Release();
+	if (vertex_buffer_) vertex_buffer_->Release();
+	if (index_buffer_) index_buffer_->Release();
+	if (matrix_buffer_) matrix_buffer_->Release();
 }
 
 void GraphicCookie::Object::Init() {
@@ -36,8 +36,8 @@ void GraphicCookie::Object::Render() {
 	D3DXMATRIX scale, rotate, translate, result, tmp;
 
 	D3DXMatrixScaling(&scale, 1.0f, 1.0f, 1.0f);
-	D3DXMatrixRotationYawPitchRoll(&rotate, 10.0f, clock() / 1000.0f, 10.0f);
-	D3DXMatrixTranslation(&translate, 0.0f, 0.0f, 10.0f);
+	D3DXMatrixRotationYawPitchRoll(&rotate, clock() / 1000.0f, clock() / 1000.0f, clock() / 1000.0f);
+	D3DXMatrixTranslation(&translate, position_.x, position_.y, position_.z);
 	D3DXMatrixMultiply(&tmp, &scale, &rotate);
 	D3DXMatrixMultiply(&result, &tmp, &translate);
 
@@ -72,9 +72,9 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 	switch (object_type)
 	{
 		case ObjectType_Triangle: {
-			vertex_info_.push_back({ -2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
-			vertex_info_.push_back({ 0.0f, -2.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ 2.0f, 2.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
+			vertex_info_.push_back({ {-2.0f, 2.0f, 0.0f}, {0.0f, 1.0f} });
+			vertex_info_.push_back({ {0.0f, -2.0f, 0.0f }, {0.5f, 0.0f} });
+			vertex_info_.push_back({ {2.0f, 2.0f, 0.0f }, {1.0f, 1.0f}});
 
 			index_info_.push_back(0);
 			index_info_.push_back(1);
@@ -82,7 +82,7 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 			break;
 		}
 		case ObjectType_Quad: {
-			vertex_info_.push_back({ -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
+			/*vertex_info_.push_back({ -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
 			vertex_info_.push_back({ 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
 			vertex_info_.push_back({ -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
 			vertex_info_.push_back({ 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
@@ -92,11 +92,11 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 			index_info_.push_back(2);
 			index_info_.push_back(1);
 			index_info_.push_back(2);
-			index_info_.push_back(3);
+			index_info_.push_back(3);*/
 			break;
 		}
 		case ObjectType_Cube: {
-			vertex_info_.push_back({ -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f });
+			/*vertex_info_.push_back({ -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f });
 			vertex_info_.push_back({ 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f });
 			vertex_info_.push_back({ -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f });
 			vertex_info_.push_back({ 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f });
@@ -152,7 +152,7 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 			index_info_.push_back(1);
 			index_info_.push_back(4);
 			index_info_.push_back(1);
-			index_info_.push_back(5);
+			index_info_.push_back(5);*/
 			break;
 		}
 		
@@ -177,6 +177,7 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 
 	if (FAILED(vertex_buffer_result)) {
 		MessageBox(NULL, "Vertex buffer not created", "ERROR", MB_OK);
+		Core::ShutdownEngineStatic();
 		return;
 	}
 
@@ -196,6 +197,7 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 
 	if (FAILED(index_buffer_result)) {
 		MessageBox(NULL, "Index buffer not created", "ERROR", MB_OK);
+		Core::ShutdownEngineStatic();
 		return;
 	}
 
@@ -212,8 +214,14 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 
 	if (FAILED(index_buffer_result)) {
 		MessageBox(NULL, "Index buffer not created", "ERROR", MB_OK);
+		Core::ShutdownEngineStatic();
 		return;
 	}
+}
+
+void GraphicCookie::Object::SetPosition(float position[3])
+{
+	position_ = position;
 }
 
 void GraphicCookie::Object::Compile() {
@@ -226,6 +234,8 @@ void GraphicCookie::Object::Compile() {
 	if (vertex_result != S_OK) {
 		char* error_message = static_cast<char*>(vertex_error->GetBufferPointer());
 		MessageBox(NULL, error_message, "Error compiling vertex shader", MB_OK);
+		Core::ShutdownEngineStatic();
+		return;
 	}
 
 	HRESULT pixel_result = D3DX11CompileFromFile("./data/shaders.shader", NULL, NULL, "PShader", "ps_4_0", 0, 0, 0, &pixel, &pixel_error, 0);
@@ -233,6 +243,8 @@ void GraphicCookie::Object::Compile() {
 	if (pixel_result != S_OK) {
 		char* error_message = static_cast<char*>(pixel_error->GetBufferPointer());
 		MessageBox(NULL, error_message, "Error compiling pixel shader", MB_OK);
+		Core::ShutdownEngineStatic();
+		return;
 	}
 
 	Core::getInstance()->getDevice().CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), 0, &vertex_shader_);
@@ -240,7 +252,7 @@ void GraphicCookie::Object::Compile() {
 
 	D3D11_INPUT_ELEMENT_DESC layout_information[] {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
 	Core::getInstance()->getDevice().CreateInputLayout(layout_information, 2, vertex->GetBufferPointer(), vertex->GetBufferSize(), &input_layout_);

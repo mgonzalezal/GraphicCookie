@@ -10,15 +10,15 @@ std::unique_ptr<GraphicCookie::Texture> texture;
 
 void GraphicCookie::Core::InitUser() {
 	cube = std::unique_ptr<GraphicCookie::Object>(new GraphicCookie::Object());
-	cube->Load(ObjectType::ObjectType_Triangle);
+	cube->Load(ObjectType::ObjectType_Cube);
 	cube->Init();
-	float pos[3] = { 0.0f,0.0f, 10.0f };
+	float pos[3] = {-5.0f,0.0f, 10.0f };
 	cube->SetPosition(pos);
 
 	cube2 = std::unique_ptr<GraphicCookie::Object>(new GraphicCookie::Object());
-	cube2->Load(ObjectType::ObjectType_Triangle);
+	cube2->Load(ObjectType::ObjectType_Cube);
 	cube2->Init();
-	float pos2[3] = { 1.0f,0.0f, 5.0f };
+	float pos2[3] = { 5.0f,0.0f, 10.0f };
 	cube2->SetPosition(pos2);
 
 	texture = std::unique_ptr<GraphicCookie::Texture>(new GraphicCookie::Texture());

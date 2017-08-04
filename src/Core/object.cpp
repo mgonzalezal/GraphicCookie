@@ -36,7 +36,7 @@ void GraphicCookie::Object::Render() {
 	D3DXMATRIX scale, rotate, translate, result, tmp;
 
 	D3DXMatrixScaling(&scale, 1.0f, 1.0f, 1.0f);
-	D3DXMatrixRotationYawPitchRoll(&rotate, clock() / 1000.0f, clock() / 1000.0f, clock() / 1000.0f);
+	D3DXMatrixRotationYawPitchRoll(&rotate, clock()*0.001f, clock()*0.0001f, 0.0f);
 	D3DXMatrixTranslation(&translate, position_.x, position_.y, position_.z);
 	D3DXMatrixMultiply(&tmp, &scale, &rotate);
 	D3DXMatrixMultiply(&result, &tmp, &translate);
@@ -72,9 +72,9 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 	switch (object_type)
 	{
 		case ObjectType_Triangle: {
-			vertex_info_.push_back({ {-2.0f, 2.0f, 0.0f}, {0.0f, 1.0f} });
-			vertex_info_.push_back({ {0.0f, -2.0f, 0.0f }, {0.5f, 0.0f} });
-			vertex_info_.push_back({ {2.0f, 2.0f, 0.0f }, {1.0f, 1.0f}});
+			vertex_info_.push_back({ {-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f} });
+			vertex_info_.push_back({ {0.0f, -1.0f, 0.0f }, {0.5f, 0.0f} });
+			vertex_info_.push_back({ {1.0f, 1.0f, 0.0f }, {1.0f, 1.0f}});
 
 			index_info_.push_back(0);
 			index_info_.push_back(1);
@@ -82,31 +82,26 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 			break;
 		}
 		case ObjectType_Quad: {
-			/*vertex_info_.push_back({ -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f });
-			vertex_info_.push_back({ 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f });
+			vertex_info_.push_back({ {-1.0f, -1.0f, 0.0f}, { 0.0f, 1.0f } });
+			vertex_info_.push_back({ { 1.0f, -1.0f, 0.0f }, { 1.0f, 1.0f} });
+			vertex_info_.push_back({ { -1.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } });
+			vertex_info_.push_back({ { 1.0f, 1.0f, 0.0f }, { 1.0f, 0.0f } });
 
 			index_info_.push_back(0);
 			index_info_.push_back(1);
 			index_info_.push_back(2);
-			index_info_.push_back(1);
 			index_info_.push_back(2);
-			index_info_.push_back(3);*/
+			index_info_.push_back(1);
+			index_info_.push_back(3);
 			break;
 		}
 		case ObjectType_Cube: {
-			/*vertex_info_.push_back({ -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f });
-			vertex_info_.push_back({ 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f });
+			//FRONT FACE - 0
+			vertex_info_.push_back({ { -1.0f, 1.0f, -1.0f },{ 0.0f , 0.0f } });
+			vertex_info_.push_back({ { 1.0f, 1.0f, -1.0f },{ 1.0f , 0.0f } });
+			vertex_info_.push_back({ { -1.0f, -1.0f, -1.0f },{ 0.0f , 1.0f } });
+			vertex_info_.push_back({ { 1.0f, -1.0f, -1.0f },{ 1.0f , 1.0f } });
 
-			vertex_info_.push_back({ -1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f });
-			vertex_info_.push_back({ -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f });
-			vertex_info_.push_back({ 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f });
-
-			//FRONT FACE
 			index_info_.push_back(0);
 			index_info_.push_back(2);
 			index_info_.push_back(3);
@@ -114,7 +109,12 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 			index_info_.push_back(3);
 			index_info_.push_back(1);
 
-			//BACK FACE
+			//BACK FACE - 4
+			vertex_info_.push_back({ { -1.0f, 1.0f, 1.0f },{ 1.0f , 0.0f } });
+			vertex_info_.push_back({ { 1.0f, 1.0f, 1.0f },{ 0.0f , 0.0f } });
+			vertex_info_.push_back({ { -1.0f, -1.0f, 1.0f },{ 1.0f , 1.0f } });
+			vertex_info_.push_back({ { 1.0f, -1.0f, 1.0f },{ 0.0f , 1.0f } });
+
 			index_info_.push_back(5);
 			index_info_.push_back(7);
 			index_info_.push_back(6);
@@ -122,37 +122,57 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 			index_info_.push_back(6);
 			index_info_.push_back(4);
 
-			//LEFT FACE
-			index_info_.push_back(4);
-			index_info_.push_back(6);
-			index_info_.push_back(2);
-			index_info_.push_back(4);
-			index_info_.push_back(2);
-			index_info_.push_back(0);
+			//LEFT FACE - 8
+			vertex_info_.push_back({ { -1.0f, 1.0f, -1.0f },{ 1.0f , 0.0f } });
+			vertex_info_.push_back({ { -1.0f, -1.0f, -1.0f },{ 1.0f , 1.0f } });
+			vertex_info_.push_back({ { -1.0f, 1.0f, 1.0f },{ 0.0f , 0.0f } });
+			vertex_info_.push_back({ { -1.0f, -1.0f, 1.0f },{ 0.0f ,1.0f } });
 
-			//RIGHT FACE
-			index_info_.push_back(1);
-			index_info_.push_back(3);
-			index_info_.push_back(7);
-			index_info_.push_back(1);
-			index_info_.push_back(7);
-			index_info_.push_back(5);
+			index_info_.push_back(10);
+			index_info_.push_back(11);
+			index_info_.push_back(9);
+			index_info_.push_back(9);
+			index_info_.push_back(8);
+			index_info_.push_back(10);
 
-			//BOTTOM FACE
-			index_info_.push_back(2);
-			index_info_.push_back(6);
-			index_info_.push_back(7);
-			index_info_.push_back(2);
-			index_info_.push_back(7);
-			index_info_.push_back(3);
+			//RIGHT FACE - 12
+			vertex_info_.push_back({ { 1.0f, 1.0f, -1.0f },{ 0.0f , 0.0f } });
+			vertex_info_.push_back({ { 1.0f, -1.0f, -1.0f },{ 0.0f , 1.0f } });
+			vertex_info_.push_back({ { 1.0f, 1.0f, 1.0f },{ 1.0f , 0.0f } });
+			vertex_info_.push_back({ { 1.0f, -1.0f, 1.0f },{ 1.0f , 1.0f } });
 
-			//TOP FACE
-			index_info_.push_back(4);
-			index_info_.push_back(0);
-			index_info_.push_back(1);
-			index_info_.push_back(4);
-			index_info_.push_back(1);
-			index_info_.push_back(5);*/
+			index_info_.push_back(12);
+			index_info_.push_back(13);
+			index_info_.push_back(15);
+			index_info_.push_back(12);
+			index_info_.push_back(15);
+			index_info_.push_back(14);
+
+			//BOTTOM FACE - 16
+			vertex_info_.push_back({ { -1.0f, -1.0f, -1.0f },{ 0.0f , 0.0f } });
+			vertex_info_.push_back({ { -1.0f, -1.0f, 1.0f },{ 0.0f , 1.0f } });
+			vertex_info_.push_back({ { 1.0f, -1.0f, -1.0f },{ 1.0f , 0.0f } });
+			vertex_info_.push_back({ { 1.0f, -1.0f, 1.0f },{ 1.0f , 1.0f } });
+
+			index_info_.push_back(16);
+			index_info_.push_back(17);
+			index_info_.push_back(19);
+			index_info_.push_back(16);
+			index_info_.push_back(19);
+			index_info_.push_back(18);
+
+			//TOP FACE - 20
+			vertex_info_.push_back({ { -1.0f, 1.0f, 1.0f },{ 0.0f , 0.0f } });
+			vertex_info_.push_back({ { -1.0f, 1.0f, -1.0f },{ 0.0f , 1.0f } });
+			vertex_info_.push_back({ { 1.0f, 1.0f, 1.0f },{ 1.0f , 0.0f } });
+			vertex_info_.push_back({ { 1.0f, 1.0f, -1.0f },{ 1.0f , 1.0f } });
+
+			index_info_.push_back(20);
+			index_info_.push_back(21);
+			index_info_.push_back(23);
+			index_info_.push_back(20);
+			index_info_.push_back(23);
+			index_info_.push_back(22);
 			break;
 		}
 		

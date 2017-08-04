@@ -34,7 +34,7 @@ SamplerState sampler_type;
 
 float4 PShader(PixelInput pixel_input) : SV_TARGET
 {
-	float texture_color;
+	float4 texture_color;
 
 	texture_color = texture_shader.Sample(sampler_type, pixel_input.tex);
 

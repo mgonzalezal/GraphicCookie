@@ -12,6 +12,7 @@ namespace GraphicCookie {
 
 		void LoadTexture(char* path_to_texture);
 		void UseTexture();
+		void DeuseTexture();
 
 		ID3D11ShaderResourceView* GetTexture();
 	private:

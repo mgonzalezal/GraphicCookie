@@ -2,9 +2,14 @@
 #include "Core\core.hpp"
 #include "Core\window.hpp"
 #include <time.h>
+#include "tiny_obj_loader.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
 
 GraphicCookie::Object::Object(){
-
+	scale_ = { 1.0f,1.0f,1.0f };
+	position_ = { 0.0f,0.0f,0.0f };
+	rotation_ = { 0.0f,0.0f,0.0f };
 }
 
 GraphicCookie::Object::~Object() {
@@ -35,8 +40,8 @@ void GraphicCookie::Object::Render() {
 
 	D3DXMATRIX scale, rotate, translate, result, tmp;
 
-	D3DXMatrixScaling(&scale, 1.0f, 1.0f, 1.0f);
-	D3DXMatrixRotationYawPitchRoll(&rotate, clock()*0.001f, clock()*0.0001f, 0.0f);
+	D3DXMatrixScaling(&scale, scale_.x, scale_.y, scale_.z);
+	D3DXMatrixRotationYawPitchRoll(&rotate, rotation_.x, rotation_.y, rotation_.z);
 	D3DXMatrixTranslation(&translate, position_.x, position_.y, position_.z);
 	D3DXMatrixMultiply(&tmp, &scale, &rotate);
 	D3DXMatrixMultiply(&result, &tmp, &translate);
@@ -68,7 +73,7 @@ void GraphicCookie::Object::Render() {
 	Core::getInstance()->getDeviceContext().DrawIndexed(index_info_.size(), 0, 0);
 }
 
-void GraphicCookie::Object::Load(ObjectType object_type) {
+void GraphicCookie::Object::Load(ObjectType object_type, std::string obj_path) {
 	switch (object_type)
 	{
 		case ObjectType_Triangle: {
@@ -175,7 +180,57 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 			index_info_.push_back(22);
 			break;
 		}
-		
+		case ObjectType_Obj: {
+			if (obj_path == "") {
+				MessageBox(NULL, "Object path not valid", "ERROR", MB_OK);
+				return;
+			}
+
+			std::vector<tinyobj::shape_t> shapes;
+			std::vector<tinyobj::material_t> materials;
+			tinyobj::attrib_t attribute;
+
+			std::string error;
+			bool success = tinyobj::LoadObj(&attribute, &shapes, &materials, &error, obj_path.c_str());
+			if (!success) {
+				MessageBox(NULL, error.c_str(), "ERROR", MB_OK);
+				return;
+			}
+			int index_elements = 0;
+			for (int i_s = 0; i_s < shapes.size(); i_s++)
+			{
+				size_t index_offset = 0;
+				for (size_t i_f = 0; i_f < shapes[i_s].mesh.num_face_vertices.size(); i_f++)
+				{
+					int facevertices = shapes[i_s].mesh.num_face_vertices[i_f];
+					for (int i_facevertices = 0; i_facevertices < facevertices; i_facevertices++)
+					{
+						tinyobj::index_t index = shapes[i_s].mesh.indices[index_offset + i_facevertices];
+						tinyobj::real_t vx = attribute.vertices[3 * index.vertex_index + 0];
+						tinyobj::real_t vy = attribute.vertices[3 * index.vertex_index + 1];
+						tinyobj::real_t vz = attribute.vertices[3 * index.vertex_index + 2];
+
+
+						tinyobj::real_t tx = 0;
+						tinyobj::real_t ty = 0;
+						if (index.texcoord_index >= 0) {
+							tinyobj::real_t tx = attribute.texcoords[2 * index.texcoord_index + 0];
+							tinyobj::real_t ty = attribute.texcoords[2 * index.texcoord_index + 1];							
+						}
+						
+
+						VertexInfo new_vertex;
+						new_vertex.position = { vx,vy,vz };
+						new_vertex.uv = { tx,ty };
+						vertex_info_.push_back(new_vertex);
+
+						index_info_.push_back(index_elements);
+						index_elements++;
+					}
+					index_offset += facevertices;
+				}
+			}
+		}
 		default: {
 			break;
 		}
@@ -242,6 +297,16 @@ void GraphicCookie::Object::Load(ObjectType object_type) {
 void GraphicCookie::Object::SetPosition(float position[3])
 {
 	position_ = position;
+}
+
+void GraphicCookie::Object::SetScale(float scale[3])
+{
+	scale_ = scale;
+}
+
+void GraphicCookie::Object::SetRotation(float rotation[3])
+{
+	rotation_ = rotation;
 }
 
 void GraphicCookie::Object::Compile() {

@@ -33,6 +33,12 @@ void GraphicCookie::Texture::UseTexture()
 	Core::getInstance()->getDeviceContext().PSSetShaderResources(0, 1, &texture_);
 }
 
+void GraphicCookie::Texture::DeuseTexture()
+{
+	ID3D11ShaderResourceView* nullSRV = nullptr;
+	Core::getInstance()->getDeviceContext().PSSetShaderResources(0, 1, &nullSRV);
+}
+
 ID3D11ShaderResourceView * GraphicCookie::Texture::GetTexture()
 {
 	return texture_;

@@ -23,6 +23,8 @@ namespace GraphicCookie {
 		void RenderUser();
 		void RenderCore();
 
+
+
 		bool IsRunning();
 
 		ID3D11Device& getDevice();

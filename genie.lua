@@ -22,12 +22,15 @@ solution "GraphicCookie"
 		kind "WindowedApp"
 		files{
 			"./src/**.cpp",
-			"./include/**.hpp"
+			"./include/**.hpp",
+			"./deps/**.cc",
+			"./deps/**.h"
 		}
 		
 		includedirs{
 			"$(DXSDK_DIR)Include",
-			"./include"
+			"./include",
+			"./deps"
 		}
 
 		links{

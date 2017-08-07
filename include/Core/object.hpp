@@ -8,7 +8,8 @@
 enum ObjectType {
 	ObjectType_Triangle,
 	ObjectType_Quad,
-	ObjectType_Cube
+	ObjectType_Cube,
+	ObjectType_Obj
 };
 
 struct VertexInfo {
@@ -31,9 +32,11 @@ namespace GraphicCookie {
 		void Init();
 		void Update();
 		void Render();
-		void Load(ObjectType object_type);
+		void Load(ObjectType object_type, std::string obj_path = "");
 
 		void SetPosition(float position[3]);
+		void SetScale(float scale[3]);
+		void SetRotation(float rotation[3]);
 	private:
 		void Compile();
 		ID3D11VertexShader* vertex_shader_;
@@ -50,5 +53,7 @@ namespace GraphicCookie {
 		MatrixData matrix_data_;
 
 		D3DXVECTOR3 position_;
+		D3DXVECTOR3 scale_;
+		D3DXVECTOR3 rotation_;
 	};
 }
